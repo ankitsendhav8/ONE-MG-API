@@ -19,23 +19,49 @@ class AuthController {
     this.AuthService = authService;
   }
   signup = async (req, res) => {
-    const data = req.body;
-    const password = await bcrypt.hash(data.userPassword, 10);
-    data.userPassword = password;
-
     try {
-      const result = await AuthService.signup(data);
-      res.status(200).json({
-        success: 1,
-        message: 'User Registered Successfully',
-        data,
-        result,
-      });
+      const data = req.body;
+      const password = await bcrypt.hash(data.password, 10);
+      let OtpCode = Math.floor(Math.random() * 1000000 + 1);
+      let currentDate = new Date();
+      let userDetails = {
+        vCustomerName: data.name,
+        vEmail: data.email,
+        vPassword: password,
+        vDialCode: '+91',
+        vPhonenumber: data.phone_number,
+        vOTPCode: OtpCode,
+        vLocation: data.address,
+        dtRegisteredDate: currentDate,
+        eStatus: 'Active',
+        eSocialMediaType: 'Application',
+        vSocialMediaId: 0,
+        eGender: 'Male',
+        eEmailVerified: 'No',
+        vOTPCode: OtpCode,
+      };
+
+      const result = await AuthService.signup(userDetails);
+      console.log(result);
+      if (result && result.length) {
+        res.status(200).json({
+          success: 1,
+          message: 'User Registered Successfully',
+          data: { customer_id: result[0] },
+        });
+      } else {
+        res.status(200).json({
+          success: 0,
+          message: 'Something went wrong, please try again',
+          data: {},
+        });
+      }
     } catch (err) {
       res.status(500).json({
         success: 0,
         message: err.code,
       });
+      console.log(err);
     }
   };
 

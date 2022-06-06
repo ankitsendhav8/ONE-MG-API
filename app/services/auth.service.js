@@ -4,7 +4,7 @@ class AuthService {
   constructor() {}
 
   signup = (data) => {
-    return db('user').insert(data);
+    return db('customer').insert(data);
   };
 
   login = (data) => {
