@@ -3,12 +3,21 @@ import db from '../config/database';
 class AuthService {
   constructor() {}
 
-  signup = (data) => {
+  register = (data) => {
     return db('customer').insert(data);
+  };
+  registerExistingUser = (data, id) => {
+    return db('customer')
+      .select()
+      .where({
+        iCustomerId: id,
+      })
+      .update(data);
   };
 
   getPhoneNumber = (data) => {
-    return db('customer').select().where('vPhonenumber', data);
+    console.log('number', data);
+    return db('customer').select('iCustomerId').where('vPhonenumber', data);
   };
   getEmail = (data) => {
     console.log(data);
