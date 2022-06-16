@@ -8,7 +8,16 @@ class AuthService {
   };
   registerExistingUser = (data, id) => {
     return db('customer')
-      .select()
+      .select(iCustomerId)
+      .where({
+        iCustomerId: id,
+      })
+      .update(data);
+  };
+
+  loginUser = (data, id) => {
+    return db('customer')
+      .select(iCustomerId)
       .where({
         iCustomerId: id,
       })
@@ -16,11 +25,9 @@ class AuthService {
   };
 
   getPhoneNumber = (data) => {
-    console.log('number', data);
     return db('customer').select('iCustomerId').where('vPhonenumber', data);
   };
   getEmail = (data) => {
-    console.log(data);
     return db('customer').select().where('vEmail', data);
   };
   getPasswordByEmail = (data) => {
@@ -43,18 +50,17 @@ class AuthService {
     });
   };
 
-  getUser = (data) => {
-    return db('user').select().where('id', data);
+  getUser = (id, otp) => {
+    return db('customer')
+      .select(iCustomerId)
+      .where({ iCustomerId: id, vOTPCode: otp });
   };
 
-  forgotPassword = (data) => {
-    return db('user').select().where('userEmail', data);
-  };
-  updatePassword = (data) => {
-    return db('user')
-      .select()
+  updateOtp = (data, id) => {
+    return db('customer')
+      .select(iCustomerId)
       .where({
-        id: data.id,
+        iCustomerId: id,
       })
       .update(data);
   };
