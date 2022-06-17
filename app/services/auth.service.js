@@ -8,7 +8,7 @@ class AuthService {
   };
   registerExistingUser = (data, id) => {
     return db('customer')
-      .select(iCustomerId)
+      .select()
       .where({
         iCustomerId: id,
       })
@@ -17,7 +17,7 @@ class AuthService {
 
   loginUser = (data, id) => {
     return db('customer')
-      .select(iCustomerId)
+      .select('iCustomerId')
       .where({
         iCustomerId: id,
       })
@@ -52,13 +52,15 @@ class AuthService {
 
   getUser = (id, otp) => {
     return db('customer')
-      .select(iCustomerId)
+      .select('iCustomerId')
       .where({ iCustomerId: id, vOTPCode: otp });
   };
-
+  getUserDetails = (id) => {
+    return db('customer').select('*').where({ iCustomerId: id });
+  };
   updateOtp = (data, id) => {
     return db('customer')
-      .select(iCustomerId)
+      .select()
       .where({
         iCustomerId: id,
       })
