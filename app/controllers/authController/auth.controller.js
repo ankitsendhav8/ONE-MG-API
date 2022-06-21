@@ -11,19 +11,50 @@ class AuthController {
     try {
       const data = req.body;
       let result;
+      let finalResult;
       let isUserAvailable = await AuthService.getPhoneNumber(data.phone_number);
       if (isUserAvailable && isUserAvailable.length) {
+        let getUserDetails = await AuthService.getUserDetails(
+          isUserAvailable[0].iCustomerId
+        );
+        let jwtSecretKey = process.env.JWT_SECRET;
+
+        let tokendata = {
+          customer_id: getUserDetails[0].iCustomerId,
+          email: getUserDetails[0].vEmail,
+          first_name: getUserDetails[0].vFirstName,
+          last_name: getUserDetails[0].vLastName,
+          full_name: getUserDetails[0].vFullName,
+          phone_number: getUserDetails[0].vPhonenumber,
+          is_mobile_verified: getUserDetails[0].eMobileVerified,
+          location: getUserDetails[0].vLocation,
+          registered_date: getUserDetails[0].dtRegisteredDate,
+          status: getUserDetails[0].eStatus,
+          joined_by: getUserDetails[0].eSocialMediaType,
+          vAccessKey: getUserDetails[0].vAccessKey,
+        };
+
+        const token = jwtwebtoken.sign(tokendata, jwtSecretKey);
+        finalResult = tokendata;
+        finalResult.access_token = token;
+        finalResult.is_already_user = true;
+
+        let date = new Date();
+        let accessKey =
+          Math.floor(Math.random() * 1000000 + 1) +
+          'medicos_app' +
+          date.getTime();
+
         let userDetails = {
           vOTPCode: '2222',
           eMobileVerified: 'No',
+          vAccessKey: accessKey,
+          dLastAccess: date,
         };
         let registerExisting = await AuthService.registerExistingUser(
           userDetails,
           isUserAvailable[0].iCustomerId
         );
-        if (registerExisting === 1) {
-          result = [isUserAvailable[0].iCustomerId];
-        }
       } else {
         let currentDate = new Date();
         let userDetails = {
@@ -35,16 +66,14 @@ class AuthController {
           vOTPCode: '1111',
           eMobileVerified: 'No',
         };
-
         result = await AuthService.register(userDetails);
+        finalResult = { customer_id: result[0], is_already_user: false };
       }
-      // const password = await bcrypt.hash(data.password, 10);
-      // let OtpCode = Math.floor(Math.random() * 1000000 + 1);
-      if (result && result.length) {
+      if (finalResult) {
         res.status(200).json({
           success: 1,
           message: 'Logged in Successfully',
-          data: { customer_id: result[0] },
+          data: finalResult,
         });
       } else {
         res.status(200).json({
@@ -58,15 +87,14 @@ class AuthController {
         success: 0,
         message: err.code,
       });
-      console.log(err);
     }
   };
 
   verifyOtp = async (req, res) => {
-    const userId = req.body.customer_id;
-    const otp_code = req.body.otp;
-
     try {
+      const userId = req.body.customer_id;
+      const otp_code = req.body.otp;
+
       const result = await AuthService.getUser(userId, otp_code);
       if (result && result.length) {
         const updateOtp = await AuthService.updateOtp(
@@ -124,7 +152,7 @@ class AuthController {
       // next(err);
       res.status(500).json({
         success: 0,
-        message: err.message || 'Something went wrong with password update',
+        message: err.message || 'Something went wrong with otp',
       });
     }
   };
@@ -138,8 +166,14 @@ class AuthController {
         Math.floor(Math.random() * 1000000 + 1) +
         'medicos_app' +
         date.getTime();
+
       let userData = {
         vEmail: userDetails.email,
+        vFirstName: userDetails.first_name,
+        vLastName: userDetails.last_name,
+        vFullName: userDetails.first_name + ' ' + userDetails.last_name,
+        eGender: userDetails.gender,
+        iPostCode: userDetails.post_code,
         eMobileVerified: 'Yes',
         vAccessKey: accessKey,
         dLastAccess: date,
@@ -153,9 +187,13 @@ class AuthController {
           userDetails.customer_id
         );
         let jwtSecretKey = process.env.JWT_SECRET;
+
         let tokendata = {
           customer_id: getUserDetails[0].iCustomerId,
           email: getUserDetails[0].vEmail,
+          first_name: getUserDetails[0].vFirstName,
+          last_name: getUserDetails[0].vLastName,
+          full_name: getUserDetails[0].vFullName,
           phone_number: getUserDetails[0].vPhonenumber,
           is_mobile_verified: getUserDetails[0].eMobileVerified,
           location: getUserDetails[0].vLocation,
