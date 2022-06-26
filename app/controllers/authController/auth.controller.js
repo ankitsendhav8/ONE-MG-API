@@ -75,7 +75,7 @@ class AuthController {
           message:
             'OTP send to ' +
             data.phone_number +
-            ' number, Please verify your number',
+            ' , Please verify your mobile number',
           data: finalResult,
         });
       } else {
