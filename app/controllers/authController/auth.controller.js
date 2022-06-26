@@ -1,7 +1,5 @@
 import jwtwebtoken from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import AuthService from '../../services/auth.service';
-import nodemailer from 'nodemailer';
 
 class AuthController {
   constructor(authService) {
@@ -36,7 +34,9 @@ class AuthController {
 
         const token = jwtwebtoken.sign(tokendata, jwtSecretKey);
         finalResult = tokendata;
-        finalResult.access_token = token;
+        if (getUserDetails[0].eMobileVerified === 'Yes') {
+          finalResult.access_token = token;
+        }
         finalResult.is_already_user = true;
 
         let date = new Date();
@@ -72,7 +72,10 @@ class AuthController {
       if (finalResult) {
         res.status(200).json({
           success: 1,
-          message: 'Logged in Successfully',
+          message:
+            'OTP send to ' +
+            data.phone_number +
+            'number, Please verify your number',
           data: finalResult,
         });
       } else {
@@ -114,7 +117,7 @@ class AuthController {
       } else {
         res.status(200).json({
           success: 0,
-          message: 'please enter valid otp',
+          message: 'please enter valid OTP',
           data: {},
         });
       }
@@ -138,7 +141,7 @@ class AuthController {
       if (result === 1) {
         res.status(200).json({
           success: 1,
-          message: 'Otp resend successfully',
+          message: 'OTP resend successfully',
           data: result,
         });
       } else {

@@ -10,10 +10,6 @@ module.exports = () => (req, res, next) => {
     jsonwebtoken.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
         next(err);
-        // return res.json({
-        //   success: false,
-        //   message: 'Token is not valid',
-        // });
       } else {
         req.decoded = decoded;
         next();
