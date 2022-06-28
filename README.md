@@ -6,7 +6,7 @@ This project was generated with Expressjs and Node js version 16.15.0
 
 ## Development server
 
-Run npm start for a server. Navigate to http://localhost:2000/. 
+Run npm start for a server. Navigate to http://localhost:2000. 
 The API server is started.
 
 
