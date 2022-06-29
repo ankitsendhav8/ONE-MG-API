@@ -11,9 +11,13 @@ class CategoryService {
       query
         .where('vCategoryName', 'like', `%${data.keyword}%`)
         .offset(data.limit * (data.page_number - 1))
-        .limit(data.limit);
+        .limit(data.limit)
+        .orderBy('iCategoryId', 'asc');
     } else {
-      query.offset(data.limit * (data.page_number - 1)).limit(data.limit);
+      query
+        .offset(data.limit * (data.page_number - 1))
+        .limit(data.limit)
+        .orderBy('iCategoryId', 'asc');
     }
     return query;
   };

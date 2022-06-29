@@ -1,5 +1,5 @@
 import { result } from 'lodash';
-import categoryService from '../../services/category.service';
+
 import CategoryService from '../../services/category.service';
 
 class CategoryController {
@@ -10,8 +10,8 @@ class CategoryController {
   getCategory = async (req, res, next) => {
     try {
       let requestedData = req.body;
-      let totalCategories = await categoryService.getCategoryCounts();
-      let result = await categoryService.getCategoryList(requestedData);
+      let totalCategories = await CategoryService.getCategoryCounts();
+      let result = await CategoryService.getCategoryList(requestedData);
 
       if (result && result.length) {
         let final_response = [];
