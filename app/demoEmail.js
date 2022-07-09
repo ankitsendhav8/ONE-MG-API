@@ -8,13 +8,13 @@ const transporter = nodemailer.createTransport({
   requireTLS: true,
   auth: {
     user: 'ankitsendhav8@gmail.com',
-    pass: 'sendhav888#',
+    pass: '',
   },
 });
 
 const mailOptions = {
   from: 'ankitsendhav8@gmail.com',
-  to: 'ajay.rathor@hiddenbrains.in',
+  to: 'send er mail',
   subject: 'Practice purpose',
   text: 'hello from tutorial',
 };

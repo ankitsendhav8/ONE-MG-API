@@ -12,6 +12,23 @@ class AuthController {
       let finalResult;
       let isUserAvailable = await AuthService.getPhoneNumber(data.phone_number);
       if (isUserAvailable && isUserAvailable.length) {
+        let date = new Date();
+        let accessKey =
+          Math.floor(Math.random() * 1000000 + 1) +
+          'medicos_app' +
+          date.getTime();
+
+        let userDetails = {
+          vOTPCode: '2222',
+          eMobileVerified: 'No',
+          vAccessKey: accessKey,
+          dLastAccess: date,
+        };
+        let registerExisting = await AuthService.registerExistingUser(
+          userDetails,
+          isUserAvailable[0].iCustomerId
+        );
+
         let getUserDetails = await AuthService.getUserDetails(
           isUserAvailable[0].iCustomerId
         );
@@ -47,22 +64,6 @@ class AuthController {
         finalResult.is_already_user = true;
         finalResult.is_detail_Updated =
           getUserDetails[0].eUserUpdated === 'Yes' ? true : false;
-        let date = new Date();
-        let accessKey =
-          Math.floor(Math.random() * 1000000 + 1) +
-          'medicos_app' +
-          date.getTime();
-
-        let userDetails = {
-          vOTPCode: '2222',
-          eMobileVerified: 'No',
-          vAccessKey: accessKey,
-          dLastAccess: date,
-        };
-        let registerExisting = await AuthService.registerExistingUser(
-          userDetails,
-          isUserAvailable[0].iCustomerId
-        );
       } else {
         let currentDate = new Date();
         let userDetails = {
@@ -99,7 +100,6 @@ class AuthController {
         });
       }
     } catch (err) {
-      console.log(err);
       res.status(500).json({
         success: 0,
         message: err.code,
@@ -194,9 +194,11 @@ class AuthController {
         iPostCode: userDetails.post_code,
         eMobileVerified: 'Yes',
         eUserUpdated: 'Yes',
-        dDateOfBirth: userDetails.date_of_birth,
+        dDateOfBirth: await GeneralFunctionService.changeDate(
+          userDetails.date_of_birth
+        ),
         vAccessKey: accessKey,
-        dLastAccess: date,
+        dLastAccess: await GeneralFunctionService.changeDate(date),
       };
       const result = await AuthService.loginUser(
         userData,
@@ -217,10 +219,15 @@ class AuthController {
           phone_number: getUserDetails[0].vPhonenumber,
           is_mobile_verified: getUserDetails[0].eMobileVerified,
           location: getUserDetails[0].vLocation,
-          registered_date: getUserDetails[0].dtRegisteredDate,
+          registered_date: await GeneralFunctionService.changeDate(
+            getUserDetails[0].dtRegisteredDate
+          ),
           status: getUserDetails[0].eStatus,
           joined_by: getUserDetails[0].eSocialMediaType,
-          vAccessKey: getUserDetails[0].vAccessKey,
+          access_key: getUserDetails[0].vAccessKey,
+          date_of_birth: await GeneralFunctionService.changeDate(
+            getUserDetails[0].dDateOfBirth
+          ),
         };
 
         const token = jwtwebtoken.sign(tokendata, jwtSecretKey);

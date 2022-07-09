@@ -4,7 +4,6 @@ class MedicineService {
   constructor() {}
 
   getMedicineList = (data) => {
-    console.log('data', data);
     let query = db('medicine')
       .select('*')
       .where('iCategoryId', '=', data.category_id);
