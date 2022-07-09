@@ -1,6 +1,6 @@
 import jwtwebtoken from 'jsonwebtoken';
 import AuthService from '../../services/auth.service';
-
+import GeneralFunctionService from '../../services/generalfunction';
 class AuthController {
   constructor(authService) {
     this.AuthService = authService;
@@ -26,19 +26,27 @@ class AuthController {
           phone_number: getUserDetails[0].vPhonenumber,
           is_mobile_verified: getUserDetails[0].eMobileVerified,
           location: getUserDetails[0].vLocation,
-          registered_date: getUserDetails[0].dtRegisteredDate,
+          registered_date: await GeneralFunctionService.changeDate(
+            getUserDetails[0].dtRegisteredDate
+          ),
           status: getUserDetails[0].eStatus,
           joined_by: getUserDetails[0].eSocialMediaType,
-          vAccessKey: getUserDetails[0].vAccessKey,
+          access_key: getUserDetails[0].vAccessKey,
+          date_of_birth: await GeneralFunctionService.changeDate(
+            getUserDetails[0].dDateOfBirth
+          ),
         };
-
         const token = jwtwebtoken.sign(tokendata, jwtSecretKey);
-        finalResult = tokendata;
-        if (getUserDetails[0].eMobileVerified === 'Yes') {
+        if (getUserDetails[0].eUserUpdated === 'Yes') {
+          finalResult = tokendata;
           finalResult.access_token = token;
+        } else {
+          finalResult = {};
+          finalResult.customer_id = getUserDetails[0].iCustomerId;
         }
         finalResult.is_already_user = true;
-
+        finalResult.is_detail_Updated =
+          getUserDetails[0].eUserUpdated === 'Yes' ? true : false;
         let date = new Date();
         let accessKey =
           Math.floor(Math.random() * 1000000 + 1) +
@@ -65,9 +73,14 @@ class AuthController {
           vSocialMediaId: 0,
           vOTPCode: '1111',
           eMobileVerified: 'No',
+          eUserUpdated: 'No',
         };
         result = await AuthService.register(userDetails);
-        finalResult = { customer_id: result[0], is_already_user: false };
+        finalResult = {
+          customer_id: result[0],
+          is_already_user: false,
+          is_detail_Updated: false,
+        };
       }
       if (finalResult) {
         res.status(200).json({
@@ -86,6 +99,7 @@ class AuthController {
         });
       }
     } catch (err) {
+      console.log(err);
       res.status(500).json({
         success: 0,
         message: err.code,
@@ -103,6 +117,7 @@ class AuthController {
         const updateOtp = await AuthService.updateOtp(
           {
             vOTPCode: '',
+            eMobileVerified: 'Yes',
           },
           result[0].iCustomerId
         );
@@ -178,6 +193,8 @@ class AuthController {
         eGender: userDetails.gender,
         iPostCode: userDetails.post_code,
         eMobileVerified: 'Yes',
+        eUserUpdated: 'Yes',
+        dDateOfBirth: userDetails.date_of_birth,
         vAccessKey: accessKey,
         dLastAccess: date,
       };
