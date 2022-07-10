@@ -6,7 +6,7 @@ import { decode } from 'jsonwebtoken';
 class GeneralFunctionService {
   constructor() {}
   getCurrentTime = () => moment().format('HH:mm:ss');
-  getCurrentDateTime = () => moment().format('DD/MM/YYYY HH:mm:ss');
+  getCurrentDateTime = () => moment().format('YYYY-MM-DD HH:mm:ss');
 
   changeDate = (value) => {
     let dstfmt = 'DD/MM/YYYY';
@@ -24,6 +24,24 @@ class GeneralFunctionService {
       );
 
       if (decoded.access_key === getUserDetails[0].vAccessKey) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  verifyMyToken = async (token, id) => {
+    try {
+      var decoded = jwt_decode(token);
+      let getUserDetails = await AuthService.getUserDetails(
+        decoded.customer_id
+      );
+      if (
+        decoded.access_key === getUserDetails[0].vAccessKey &&
+        decoded.customer_id === +id
+      ) {
         return true;
       } else {
         return false;

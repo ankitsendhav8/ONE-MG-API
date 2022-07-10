@@ -66,6 +66,14 @@ class AuthService {
       })
       .update(data);
   };
+  logoutUser = (id) => {
+    return db('customer')
+      .select()
+      .where({
+        iCustomerId: id,
+      })
+      .update({ vAccessKey: '' });
+  };
 }
 
 export default new AuthService();

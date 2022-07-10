@@ -253,5 +253,47 @@ class AuthController {
       });
     }
   };
+  logout = async (req, res) => {
+    try {
+      const userId = req.body.customer_id;
+
+      if (req.headers && req.headers.authorization) {
+        let isTokenVerified = await GeneralFunctionService.verifyToken(
+          req.headers.authorization.split(' ')[1]
+        );
+        if (isTokenVerified) {
+          const result = await AuthService.logoutUser(userId);
+
+          if (result) {
+            res.status(200).json({
+              success: 1,
+              message: 'User logout successfully',
+            });
+          } else {
+            res.status(200).json({
+              success: 0,
+              message: 'Something went wrong, please try again.',
+            });
+          }
+        } else {
+          res.status(403).json({
+            success: 0,
+            message: 'Invalid User ',
+          });
+        }
+      } else {
+        res.status(200).json({
+          success: 0,
+          message: 'Token not found',
+        });
+      }
+    } catch (err) {
+      // next(err);
+      res.status(500).json({
+        success: 0,
+        message: err.message,
+      });
+    }
+  };
 }
 export default new AuthController(AuthService);
